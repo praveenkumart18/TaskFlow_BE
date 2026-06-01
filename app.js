@@ -15,7 +15,11 @@ const allowedOrigins = (process.env.CLIENT_URL || 'http://localhost:5173')
   .map((origin) => origin.trim())
   .filter(Boolean);
 
-app.use(helmet());
+app.use(
+  helmet({
+    contentSecurityPolicy: false
+  })
+);
 app.use(
   cors({
     origin: allowedOrigins,
@@ -253,7 +257,23 @@ app.get('/api/health', (req, res) => {
  *       201:
  *         description: Message added successfully
  */
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+app.get('/api-docs.json', (req, res) => {
+  res.setHeader('Content-Type', 'application/json');
+  res.status(200).json(swaggerSpec);
+});
+
+app.use(
+  '/api-docs',
+  swaggerUi.serve,
+  swaggerUi.setup(null, {
+    explorer: true,
+    swaggerOptions: {
+      url: '/api-docs.json',
+      persistAuthorization: true
+    },
+    customSiteTitle: 'TaskFlow API Docs'
+  })
+);
 app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/tasks', taskRoutes);
 
