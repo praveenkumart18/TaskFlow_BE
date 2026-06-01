@@ -9,7 +9,8 @@ const taskRoutes = require('./routes/taskRoutes');
 const { notFound, errorHandler } = require('./middleware/errorMiddleware');
 
 const app = express();
-const allowedOrigins = (process.env.CLIENT_URL || 'http://localhost:5173')
+const defaultOrigins = ['http://localhost:5173', 'https://taskflow-pk.vercel.app'];
+const allowedOrigins = (process.env.CLIENT_URL || defaultOrigins.join(','))
   .split(',')
   .map((origin) => origin.trim())
   .filter(Boolean);
