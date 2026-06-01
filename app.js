@@ -3,7 +3,6 @@ const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
 const rateLimit = require('express-rate-limit');
-const swaggerUi = require('swagger-ui-express');
 const swaggerSpec = require('./swagger/swagger');
 const authRoutes = require('./routes/authRoutes');
 const taskRoutes = require('./routes/taskRoutes');
@@ -262,18 +261,43 @@ app.get('/api-docs.json', (req, res) => {
   res.status(200).json(swaggerSpec);
 });
 
-app.use(
-  '/api-docs',
-  swaggerUi.serve,
-  swaggerUi.setup(null, {
-    explorer: true,
-    swaggerOptions: {
-      url: '/api-docs.json',
-      persistAuthorization: true
-    },
-    customSiteTitle: 'TaskFlow API Docs'
-  })
-);
+app.get('/api-docs', (req, res) => {
+  const swaggerUiVersion = '5.32.6';
+
+  res.type('html').send(`<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>TaskFlow API Docs</title>
+    <link rel="stylesheet" href="https://unpkg.com/swagger-ui-dist@${swaggerUiVersion}/swagger-ui.css" />
+    <style>
+      html { box-sizing: border-box; overflow-y: scroll; }
+      *, *:before, *:after { box-sizing: inherit; }
+      body { margin: 0; background: #fafafa; }
+      #swagger-ui { width: 100%; }
+    </style>
+  </head>
+  <body>
+    <div id="swagger-ui"></div>
+    <script src="https://unpkg.com/swagger-ui-dist@${swaggerUiVersion}/swagger-ui-bundle.js" crossorigin></script>
+    <script src="https://unpkg.com/swagger-ui-dist@${swaggerUiVersion}/swagger-ui-standalone-preset.js" crossorigin></script>
+    <script>
+      window.onload = () => {
+        window.ui = SwaggerUIBundle({
+          url: '/api-docs.json',
+          dom_id: '#swagger-ui',
+          deepLinking: true,
+          persistAuthorization: true,
+          displayRequestDuration: true,
+          presets: [SwaggerUIBundle.presets.apis, SwaggerUIStandalonePreset],
+          layout: 'BaseLayout'
+        });
+      };
+    </script>
+  </body>
+</html>`);
+});
 app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/tasks', taskRoutes);
 
