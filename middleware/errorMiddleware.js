@@ -31,10 +31,12 @@ const errorHandler = (err, req, res, next) => {
     message = 'Authentication token has expired';
   }
 
+  const showStack = process.env.NODE_ENV === 'development' && !process.env.VERCEL;
+
   res.status(statusCode).json({
     success: false,
     message,
-    ...(process.env.NODE_ENV === 'development' && { stack: err.stack })
+    ...(showStack && { stack: err.stack })
   });
 };
 

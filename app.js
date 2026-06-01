@@ -10,11 +10,15 @@ const taskRoutes = require('./routes/taskRoutes');
 const { notFound, errorHandler } = require('./middleware/errorMiddleware');
 
 const app = express();
+const allowedOrigins = (process.env.CLIENT_URL || 'http://localhost:5173')
+  .split(',')
+  .map((origin) => origin.trim())
+  .filter(Boolean);
 
 app.use(helmet());
 app.use(
   cors({
-    origin: process.env.CLIENT_URL || 'http://localhost:5173',
+    origin: allowedOrigins,
     credentials: true
   })
 );
@@ -34,6 +38,19 @@ app.use(
     message: { success: false, message: 'Too many requests, please try again later' }
   })
 );
+
+app.get('/', (req, res) => {
+  res.status(200).json({
+    success: true,
+    message: 'TaskFlow API is running',
+    data: {
+      health: '/api/health',
+      docs: '/api-docs',
+      auth: '/api/v1/auth',
+      tasks: '/api/v1/tasks'
+    }
+  });
+});
 
 /**
  * @swagger
