@@ -10,8 +10,8 @@ const options = {
     },
     servers: [
       {
-        url: process.env.API_BASE_URL || 'http://localhost:5000',
-        description: process.env.API_BASE_URL ? 'Deployed server' : 'Local development server'
+        url: process.env.API_BASE_URL || 'https://taskflow-bpk.vercel.app/',
+        description: process.env.API_BASE_URL ? 'Configured server' : 'Production server'
       }
     ],
     components: {
