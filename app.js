@@ -9,23 +9,42 @@ const taskRoutes = require('./routes/taskRoutes');
 const { notFound, errorHandler } = require('./middleware/errorMiddleware');
 
 const app = express();
-const defaultOrigins = ['http://localhost:5173', 'https://taskflow-pk.vercel.app'];
+const defaultOrigins = ['http://localhost:5173', 'https://taskflow-pk.vercel.app', 'https://taskflow-bpk.vercel.app'];
 const allowedOrigins = (process.env.CLIENT_URL || defaultOrigins.join(','))
   .split(',')
   .map((origin) => origin.trim())
   .filter(Boolean);
+const isAllowedOrigin = (origin) => {
+  if (!origin) {
+    return true;
+  }
+
+  if (allowedOrigins.includes(origin)) {
+    return true;
+  }
+
+  return /^https:\/\/[a-z0-9-]+\.vercel\.app$/i.test(origin);
+};
+
+const corsOptions = {
+  origin(origin, callback) {
+    if (isAllowedOrigin(origin)) {
+      callback(null, true);
+      return;
+    }
+
+    callback(new Error(`CORS blocked for origin: ${origin}`));
+  },
+  credentials: true
+};
 
 app.use(
   helmet({
     contentSecurityPolicy: false
   })
 );
-app.use(
-  cors({
-    origin: allowedOrigins,
-    credentials: true
-  })
-);
+app.use(cors(corsOptions));
+app.options('*', cors(corsOptions));
 app.use(express.json({ limit: '10kb' }));
 app.use(express.urlencoded({ extended: true }));
 
